@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aspect Ratio Calculator</title>
+<style>
+:root {
+  --bg: #fafaf6;
+  --surface: #ffffff;
+  --ink: #0a1d1e;
+  --ink-soft: #2c4a4c;
+  --rule: #c8d4d3;
+  --teal: #0f5c60;
+  --teal-deep: #0a4548;
+  --gold: #b07d2a;
+  --gold-deep: #8a611f;
+  --ok: #1a5c2e;
+  --warn: #8a5a00;
+  --err: #8b1a1a;
+  --code-bg: #f0ebe1;
+}
+[data-theme="dark"] {
+  --bg: #0c1c1d;
+  --surface: #14292a;
+  --ink: #e8ebe6;
+  --ink-soft: #b0c0bd;
+  --rule: #2a4042;
+  --teal: #4ab4ba;
+  --teal-deep: #6dc8ce;
+  --gold: #d4a155;
+  --gold-deep: #e6b876;
+  --ok: #6dd380;
+  --warn: #d4a155;
+  --err: #e88080;
+  --code-bg: #0a1718;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  line-height: 1.55;
+}
+.wrap { max-width: 1100px; margin: 0 auto; }
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 2px solid var(--teal);
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+h1 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--teal);
+}
+.tag {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.75rem;
+  color: var(--gold-deep);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+[data-theme="dark"] .tag { color: var(--gold); }
+.theme-btn {
+  background: transparent;
+  border: 1px solid var(--rule);
+  color: var(--ink-soft);
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+  font-family: inherit;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.theme-btn:hover { border-color: var(--teal); color: var(--teal); }
+.lede {
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  margin-bottom: 1.75rem;
+  max-width: 60ch;
+}
+.section {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+  border-radius: 3px;
+}
+.section-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.85rem;
+}
+label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+input[type="text"], input[type="number"] {
+  width: 100%;
+  background: var(--code-bg);
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  padding: 0.7rem 0.85rem;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.95rem;
+  border-radius: 2px;
+}
+input:focus { outline: 2px solid var(--teal); outline-offset: 1px; }
+.grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 0.85rem;
+  align-items: end;
+}
+.times {
+  font-family: ui-monospace, monospace;
+  font-size: 1.2rem;
+  color: var(--ink-soft);
+  padding-bottom: 0.7rem;
+  text-align: center;
+}
+.result-big {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 2.25rem;
+  font-weight: 600;
+  color: var(--teal);
+  margin: 0.5rem 0;
+  letter-spacing: 0.02em;
+}
+.result-sub {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  font-family: ui-monospace, monospace;
+}
+.preview-wrap {
+  margin-top: 1rem;
+  background: var(--code-bg);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 160px;
+}
+.preview-box {
+  background: var(--teal);
+  border-radius: 2px;
+  max-width: 100%;
+  max-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--surface);
+  font-family: ui-monospace, monospace;
+  font-size: 0.8rem;
+}
+[data-theme="dark"] .preview-box { color: var(--bg); }
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}
+button.preset {
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  border-radius: 2px;
+}
+button.preset:hover { border-color: var(--teal); color: var(--teal); }
+.solve-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.85rem;
+  align-items: end;
+}
+.field-note { font-size: 0.72rem; color: var(--ink-soft); margin-top: 0.35rem; font-style: italic; }
+.privacy-note {
+  font-size: 0.78rem;
+  color: var(--gold-deep);
+  margin-top: 0.85rem;
+}
+[data-theme="dark"] .privacy-note { color: var(--gold); }
+footer {
+  margin-top: 3rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+}
+footer a { color: var(--teal); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+@media (max-width: 640px) {
+  body { padding: 1rem 0.75rem; }
+  h1 { font-size: 1.4rem; }
+  .grid, .solve-grid { grid-template-columns: 1fr; }
+  .times { text-align: left; padding-bottom: 0; }
+  .result-big { font-size: 1.6rem; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <h1>Aspect Ratio Calculator</h1>
+    <div class="tag">Ratios and dimensions, in your browser</div>
+  </div>
+  <button class="theme-btn" id="theme-toggle" type="button">Dark</button>
+</header>
+
+<p class="lede">Enter a width and height to get the simplified ratio. Or lock a ratio and one dimension to solve for the other. Everything updates as you type, and nothing leaves this page.</p>
+
+<div class="section">
+  <div class="section-title">Width and height to ratio</div>
+  <div class="grid">
+    <div>
+      <label for="w">Width (px)</label>
+      <input type="number" id="w" value="1920" min="0" step="1" inputmode="numeric">
+    </div>
+    <div class="times">x</div>
+    <div>
+      <label for="h">Height (px)</label>
+      <input type="number" id="h" value="1080" min="0" step="1" inputmode="numeric">
+    </div>
+  </div>
+  <div class="result-big" id="ratio-out">16:9</div>
+  <div class="result-sub" id="ratio-decimal">1.778:1 (decimal)</div>
+
+  <div class="preview-wrap">
+    <div class="preview-box" id="preview"></div>
+  </div>
+
+  <div class="presets" id="presets"></div>
+  <div class="privacy-note">No network calls. The math runs entirely in your browser.</div>
+</div>
+
+<div class="section">
+  <div class="section-title">Solve for a missing dimension</div>
+  <div class="solve-grid">
+    <div>
+      <label for="rw">Ratio width</label>
+      <input type="number" id="rw" value="16" min="0" step="any" inputmode="decimal">
+    </div>
+    <div>
+      <label for="rh">Ratio height</label>
+      <input type="number" id="rh" value="9" min="0" step="any" inputmode="decimal">
+    </div>
+    <div></div>
+  </div>
+  <div class="solve-grid" style="margin-top: 0.85rem;">
+    <div>
+      <label for="sw">Known width (px)</label>
+      <input type="number" id="sw" placeholder="e.g. 2560" min="0" step="any" inputmode="decimal">
+      <div class="field-note">Leave one field blank to solve it.</div>
+    </div>
+    <div>
+      <label for="sh">Known height (px)</label>
+      <input type="number" id="sh" placeholder="e.g. 1440" min="0" step="any" inputmode="decimal">
+      <div class="field-note" id="solve-note">Result rounds to whole pixels.</div>
+    </div>
+    <div></div>
+  </div>
+</div>
+
+<footer>
+  <div>Aspect Ratio Calculator. Open source, MIT licensed. <a href="https://github.com/0xelitesystem/aspect-ratio-calculator" target="_blank" rel="noopener">View source</a>.</div>
+  <div>For screens, video, and image work.</div>
+</footer>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+const themeBtn = $("theme-toggle");
+function setTheme(t) {
+  document.documentElement.setAttribute("data-theme", t);
+  themeBtn.textContent = t === "dark" ? "Light" : "Dark";
+}
+themeBtn.addEventListener("click", () => {
+  const cur = document.documentElement.getAttribute("data-theme") || "light";
+  setTheme(cur === "dark" ? "light" : "dark");
+});
+
+function gcd(a, b) {
+  a = Math.abs(Math.round(a));
+  b = Math.abs(Math.round(b));
+  while (b) { [a, b] = [b, a % b]; }
+  return a || 1;
+}
+
+const PRESETS = [
+  { label: "16:9", w: 16, h: 9 },
+  { label: "4:3", w: 4, h: 3 },
+  { label: "21:9", w: 21, h: 9 },
+  { label: "1:1", w: 1, h: 1 },
+  { label: "9:16", w: 9, h: 16 },
+  { label: "3:2", w: 3, h: 2 },
+  { label: "2:1", w: 2, h: 1 },
+];
+
+function renderPresets() {
+  const el = $("presets");
+  el.innerHTML = "";
+  PRESETS.forEach((p) => {
+    const b = document.createElement("button");
+    b.className = "preset";
+    b.type = "button";
+    b.textContent = p.label;
+    b.addEventListener("click", () => {
+      // Scale preset to a sensible width, keep current width if positive
+      const curW = parseFloat($("w").value) || 1920;
+      $("w").value = Math.round(curW);
+      $("h").value = Math.round(curW * p.h / p.w);
+      updateRatio();
+    });
+    el.appendChild(b);
+  });
+}
+
+function updateRatio() {
+  const w = parseFloat($("w").value);
+  const h = parseFloat($("h").value);
+  if (!w || !h || w <= 0 || h <= 0) {
+    $("ratio-out").textContent = "?:?";
+    $("ratio-decimal").textContent = "Enter positive width and height";
+    $("preview").style.width = "0";
+    $("preview").style.height = "0";
+    return;
+  }
+  const g = gcd(w, h);
+  const rw = Math.round(w) / g;
+  const rh = Math.round(h) / g;
+  $("ratio-out").textContent = rw + ":" + rh;
+  const dec = (w / h);
+  $("ratio-decimal").textContent = dec.toFixed(3) + ":1 (decimal)";
+
+  // Preview box scaled to fit container
+  const maxW = 320, maxH = 200;
+  let pw = w, ph = h;
+  const scale = Math.min(maxW / pw, maxH / ph);
+  pw = Math.max(20, pw * scale);
+  ph = Math.max(20, ph * scale);
+  const box = $("preview");
+  box.style.width = pw + "px";
+  box.style.height = ph + "px";
+  box.textContent = Math.round(w) + " x " + Math.round(h);
+}
+
+// Solve-for mode: ratio + one dimension -> the other
+function updateSolve(changed) {
+  const rw = parseFloat($("rw").value);
+  const rh = parseFloat($("rh").value);
+  if (!rw || !rh || rw <= 0 || rh <= 0) return;
+
+  const swEl = $("sw"), shEl = $("sh");
+  const swVal = swEl.value.trim();
+  const shVal = shEl.value.trim();
+
+  if (changed === "sw" && swVal !== "") {
+    const w = parseFloat(swVal);
+    if (w > 0) shEl.value = +(w * rh / rw).toFixed(2);
+  } else if (changed === "sh" && shVal !== "") {
+    const h = parseFloat(shVal);
+    if (h > 0) swEl.value = +(h * rw / rh).toFixed(2);
+  } else if (changed === "ratio") {
+    // Recompute based on whichever dimension is present
+    if (swVal !== "") {
+      const w = parseFloat(swVal);
+      if (w > 0) shEl.value = +(w * rh / rw).toFixed(2);
+    } else if (shVal !== "") {
+      const h = parseFloat(shVal);
+      if (h > 0) swEl.value = +(h * rw / rh).toFixed(2);
+    }
+  }
+}
+
+["w", "h"].forEach((id) => $(id).addEventListener("input", updateRatio));
+$("sw").addEventListener("input", () => updateSolve("sw"));
+$("sh").addEventListener("input", () => updateSolve("sh"));
+$("rw").addEventListener("input", () => updateSolve("ratio"));
+$("rh").addEventListener("input", () => updateSolve("ratio"));
+
+// Respect prefers-color-scheme on first load
+const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+setTheme(prefersDark ? "dark" : "light");
+renderPresets();
+updateRatio();
+</script>
+</body>
+</html>
